@@ -35,33 +35,29 @@ stages {
         }
     }
     stage(' Test environment deployment'){ // docker build DB images
-        stage(' Build Cast Image') {
-            steps {
-                script {
-                    sh '''
-                    docker network create my_network || true
-
-                    docker run -d \
-                    --name cast_db_dev_container --network my_network\
-                    -v postgres_data_cast:/var/lib/postgresql/data/ \
-                    -e POSTGRES_USER=cast_db_username \
-                    -e POSTGRES_PASSWORD=cast_db_password \
-                    -e POSTGRES_DB=cast_db_dev \
-                    -p 5433:5432 \
-                    postgres:12.1-alpine
-
-                    docker run -d \
-                    --name movie_db_dev_container --network my_network\
-                    -v postgres_data_movie:/var/lib/postgresql/data/ \
-                    -e POSTGRES_USER=movie_db_username \
-                    -e POSTGRES_PASSWORD=movie_db_password \
-                    -e POSTGRES_DB=movie_db_dev \
-                    -p 5434:5432 \
-                    postgres:12.1-alpine
-                    '''
+        steps {
+            script {
+                sh '''
+                docker network create my_network || true
+                docker run -d \
+                --name cast_db_dev_container --network my_network\
+                -v postgres_data_cast:/var/lib/postgresql/data/ \
+                -e POSTGRES_USER=cast_db_username \
+                -e POSTGRES_PASSWORD=cast_db_password \
+                -e POSTGRES_DB=cast_db_dev \
+                -p 5433:5432 \
+                postgres:12.1-alpine
+                docker run -d \
+                --name movie_db_dev_container --network my_network\
+                -v postgres_data_movie:/var/lib/postgresql/data/ \
+                -e POSTGRES_USER=movie_db_username \
+                -e POSTGRES_PASSWORD=movie_db_password \
+                -e POSTGRES_DB=movie_db_dev \
+                -p 5434:5432 \
+                postgres:12.1-alpine
+                '''
                 }
             }
-        }
     }
     stage('Docker run'){ // run containers from our builded images
         parallel {
