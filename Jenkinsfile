@@ -34,14 +34,43 @@ stages {
 
         }
     }
+    stage(' Test environment deployment'){ // docker build DB images
+        stage(' Build Cast Image') {
+            steps {
+                script {
+                    sh '''
+                    docker network create my_network || true
+
+                    docker run -d \
+                    --name cast_db_dev_container --network my_network\
+                    -v postgres_data_cast:/var/lib/postgresql/data/ \
+                    -e POSTGRES_USER=cast_db_username \
+                    -e POSTGRES_PASSWORD=cast_db_password \
+                    -e POSTGRES_DB=cast_db_dev \
+                    -p 5433:5432 \
+                    postgres:12.1-alpine
+
+                    docker run -d \
+                    --name movie_db_dev_container --network my_network\
+                    -v postgres_data_movie:/var/lib/postgresql/data/ \
+                    -e POSTGRES_USER=movie_db_username \
+                    -e POSTGRES_PASSWORD=movie_db_password \
+                    -e POSTGRES_DB=movie_db_dev \
+                    -p 5434:5432 \
+                    postgres:12.1-alpine
+                    '''
+                }
+            }
+        }
+    }
     stage('Docker run'){ // run containers from our builded images
         parallel {
             stage(' Run Cast Container') {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 8002:8000 --name $DOCKER_IMAGE_CAST \
-                        -e DATABASE_URI=postgresql://cast_db_username:cast_db_password@cast_db/cast_db_dev \
+                        docker run -d -p 8002:8000 --name $DOCKER_IMAGE_CAST --network my_network\
+                        -e DATABASE_URI=postgresql://cast_db_username:cast_db_password@cast_db:5433/cast_db_dev \
                         $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG \
                         uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
                         sleep 10
@@ -53,8 +82,8 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 8001:8000 --name $DOCKER_IMAGE_MOVIE \
-                        -e DATABASE_URI=postgresql://movie_db_username:movie_db_password@movie_db/movie_db_dev \
+                        docker run -d -p 8001:8000 --name $DOCKER_IMAGE_MOVIE --network my_network\
+                        -e DATABASE_URI=postgresql://movie_db_username:movie_db_password@movie_db:5434/movie_db_dev \
                         -e CAST_SERVICE_HOST_URL=http://cast_service:8000/api/v1/casts/ \
                         $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG \
                         uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
