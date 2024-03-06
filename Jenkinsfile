@@ -38,6 +38,8 @@ stages {
         steps {
             script {
                 sh '''
+                docker container rm -f cast_db_dev_container || true
+                docker container rm -f movie_db_dev_container || true
                 docker network create my_network || true
                 docker run -d \
                 --name cast_db_dev_container --network my_network\
