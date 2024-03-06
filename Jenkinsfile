@@ -220,7 +220,7 @@ stage('Deploiement en staging'){
             }
 
         }
-  stage('Deploiement en prod'){
+stage('Deploiement en prod'){
         when {
             branch 'master' // Cette condition s'assure que le stage ne s'exécute que sur la branche master
         }
@@ -232,9 +232,9 @@ stage('Deploiement en staging'){
             steps {
             // Create an Approval Button with a timeout of 15minutes.
             // this require a manuel validation in order to deploy on production environment
-                    timeout(time: 15, unit: "MINUTES") {
-                        input message: 'Do you want to deploy in production ?', ok: 'Yes'
-                    }
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                }
 
                 script {
                 sh '''
