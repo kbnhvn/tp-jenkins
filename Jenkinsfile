@@ -1,68 +1,120 @@
 pipeline {
 environment { // Declaration of environment variables
 DOCKER_ID = "kbnhvn" // replace this with your docker-id
-DOCKER_IMAGE_CAST = "cast-service"
-DOCKER_IMAGE_MOVIE = "movie-service"
+DOCKER_IMAGE_CAST = "cast"
+DOCKER_IMAGE_MOVIE = "movie"
 PORT_CAST = ''
-PORT_MOVUE = ''
+PORT_MOVIE = ''
 DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
 }
 agent any // Jenkins will be able to select all available agents
 stages {
-        stage(' Docker Build'){ // docker build image stage
-            steps {
-                script {
-                sh '''
-                 docker rm -f jenkins $DOCKER_IMAGE_CAST
-                 docker rm -f jenkins $DOCKER_IMAGE_MOVIE
-                 docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_CAST
-                 docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_MOVIE
-                sleep 6
-                '''
-                }
-            }
-        }
-        stage('Docker run'){ // run container from our builded image
+    stage(' Docker Build'){ // docker build images stage
+        parallel {
+            stage(' Build Cast Image') {
                 steps {
                     script {
-                    sh '''
-                    docker run -d -p 80:80 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
-                    docker run -d -p 80:80 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
-                    sleep 10
-                    '''
+                        sh '''
+                        docker rm -f jenkins $DOCKER_IMAGE_CAST
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_CAST
+                        sleep 6
+                        '''
                     }
                 }
             }
-
-        stage('Test Acceptance'){ // we launch the curl command to validate that the container responds to the request
-            steps {
+            stage(' Build Movie Image') {
+                steps {
                     script {
-                    sh '''
-                    curl localhost:$PORT_CAST
-                    curl localhost:$PORT_MOVIE
-                    '''
+                        sh '''
+                        docker rm -f jenkins $DOCKER_IMAGE_MOVIE
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_MOVIE
+                        sleep 6
+                        '''
                     }
-            }
-
-        }
-        stage('Docker Push'){ //we pass the built image to our docker hub account
-            environment
-            {
-                DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
-            }
-
-            steps {
-
-                script {
-                sh '''
-                docker login -u $DOCKER_ID -p $DOCKER_PASS
-                docker push $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
-                docker push $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
-                '''
                 }
             }
 
         }
+    }
+    stage('Docker run'){ // run containers from our builded images
+        parallel {
+            stage(' Run Cast Container') {
+                steps {
+                    script {
+                        sh '''
+                        docker run -d -p 80:80 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
+                        sleep 10
+                        '''
+                    }
+                }
+            }
+            stage(' Run Movie Container') {
+                steps {
+                    script {
+                        sh '''
+                        docker run -d -p 80:80 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
+                        sleep 10
+                        '''
+                    }
+                }
+            }
+
+        }
+    }
+    stage('Test Acceptance'){ // we launch the curl commands to validate that the containers responds to the request
+        parallel {
+            stage(' Test Cast Container') {
+                steps {
+                    script {
+                        sh '''
+                        curl localhost:$PORT_CAST
+                        '''
+                    }
+                }
+            }
+            stage(' Test Movie Container') {
+                steps {
+                    script {
+                        sh '''
+                        curl localhost:$PORT_MOVIE
+                        '''
+                    }
+                }
+            }
+
+        }
+
+    }
+    stage('Docker Push'){ //we pass the built images to our docker hub account
+        environment
+        {
+            DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
+        }
+        parallel {
+            stage(' Push Cast Image') {
+                steps {
+                    script {
+                        sh '''
+                        docker login -u $DOCKER_ID -p $DOCKER_PASS
+                        docker push $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
+                        '''
+                    }
+                }
+            }
+            stage(' Push Movie Image') {
+                steps {
+                    script {
+                        sh '''
+                        docker login -u $DOCKER_ID -p $DOCKER_PASS
+                        docker push $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
+                        '''
+                    }
+                }
+            }
+
+        }
+
+    }
 
 stage('Deploiement en dev'){
         environment
