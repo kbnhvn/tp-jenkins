@@ -4,6 +4,6 @@ metadata:
   name: fastapi-cast-config
   namespace: standard
 data:
-  HOST: "postgres-cast-service.svc.cluster.local"
+  HOST: "postgres-cast-service.{{ .Values.namespace }}.svc.cluster.local"
   PORT: "5432"
-  NAME: "cast_db_dev"
+  NAME: "cast_db_{{ .Values.namespace }}"

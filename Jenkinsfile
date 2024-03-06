@@ -118,6 +118,7 @@ stage('Deploiement en dev'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = "dev"
         }
             steps {
                 script {
@@ -128,6 +129,7 @@ stage('Deploiement en dev'){
                 cat $KUBECONFIG > .kube/config
                 cp fastapi/values.yaml values.yml
                 cat values.yml
+                sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app fastapi --values=values.yml --namespace dev
                 '''
@@ -139,6 +141,7 @@ stage('Deploiement en QA'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = "ga"
         }
             steps {
                 script {
@@ -149,6 +152,7 @@ stage('Deploiement en QA'){
                 cat $KUBECONFIG > .kube/config
                 cp fastapi/values.yaml values.yml
                 cat values.yml
+                sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app fastapi --values=values.yml --namespace qa
                 '''
@@ -160,6 +164,7 @@ stage('Deploiement en staging'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = "staging"
         }
             steps {
                 script {
@@ -170,6 +175,7 @@ stage('Deploiement en staging'){
                 cat $KUBECONFIG > .kube/config
                 cp fastapi/values.yaml values.yml
                 cat values.yml
+                sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app fastapi --values=values.yml --namespace staging
                 '''
@@ -184,6 +190,7 @@ stage('Deploiement en staging'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        NAMESPACE = "prod"
         }
             steps {
             // Create an Approval Button with a timeout of 15minutes.
@@ -200,6 +207,7 @@ stage('Deploiement en staging'){
                 cat $KUBECONFIG > .kube/config
                 cp fastapi/values.yaml values.yml
                 cat values.yml
+                sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app fastapi --values=values.yml --namespace prod
                 '''

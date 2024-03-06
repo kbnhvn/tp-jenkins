@@ -7,9 +7,9 @@ spec:
   # tls:
   #   - secretName: fastapi-selfsigned-secret
   #     hosts:
-  #       - jenkins.cours-datascientest-devops.cloudns.be
+  #       - "{{ .Values.namespace }}.cours-datascientest-devops.cloudns.be"
   rules:
-  - host: jenkins.cours-datascientest-devops.cloudns.be
+  - host: "{{ .Values.namespace }}.cours-datascientest-devops.cloudns.be"
     http:
       paths:
         # Path movies

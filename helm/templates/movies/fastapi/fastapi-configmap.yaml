@@ -4,6 +4,6 @@ metadata:
   name: fastapi-movie-config
   namespace: standard
 data:
-  HOST: "postgres-movie-service.svc.cluster.local"
+  HOST: "postgres-movie-service.{{ .Values.namespace }}.svc.cluster.local"
   PORT: "5432"
-  NAME: "movie_db_dev"
+  NAME: "movie_db_.{{ .Values.namespace }}"

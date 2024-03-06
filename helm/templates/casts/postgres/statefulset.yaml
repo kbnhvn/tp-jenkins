@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: postgres-cast
-  replicas: 1
+  replicas: "{{ .Values.db_casts.replicaCount }}"
   template:
     metadata:
       labels:
@@ -15,10 +15,10 @@ spec:
     spec:
       containers:
       - name: postgres-cast
-        image: postgres:12.0-alpine
+        image: "{{ .Values.db_casts.image.repository }}:{{ .Values.db_casts.image.tag | default .Chart.AppVersion }}"
         env:
         - name: POSTGRES_DB
-          value: "cast_db_dev"
+          value: "cast_db_{{ .Values.namespace }}"
         envFrom:
           - secretRef:
               name: postgres-cast-credentials

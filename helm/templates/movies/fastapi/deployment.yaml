@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: fastapi-movie
 spec:
-  replicas: 1
+  replicas: "{{ .Values.movies.replicaCount }}"
   selector:
     matchLabels:
       app: fastapi-movie
@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
       - name: fastapi-movie
-        image: kbnhvn/fastapi-movie:v.0.0.1
+        image: "{{ .Values.movies.image.repository }}:{{ .Values.movies.image.tag | default .Chart.AppVersion }}"
         command: ["uvicorn"]
         args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
         env:
         - name: DATABASE_URI
           value: "postgresql://$(USERNAME):$(PASSWORD)@$(HOST):$(PORT)/$(NAME)"
         - name: CAST_SERVICE_HOST_URL
-          value: "http://fastapi-cast-service.svc.cluster.local:8000/api/v1/casts/"
+          value: "http://fastapi-cast-service.{{ .Values.namespace }}.svc.cluster.local:8000/api/v1/casts/"
         envFrom:
           - secretRef:
               name: fastapi-movie-credentials

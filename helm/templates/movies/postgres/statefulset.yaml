@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: postgres-movie
-  replicas: 1
+  replicas: "{{ .Values.db_movies.replicaCount }}"
   template:
     metadata:
       labels:
@@ -15,10 +15,10 @@ spec:
     spec:
       containers:
       - name: postgres-movie
-        image: postgres:12.0-alpine
+        image: "{{ .Values.db_movies.image.repository }}:{{ .Values.db_movies.image.tag | default .Chart.AppVersion }}"
         env:
         - name: POSTGRES_DB
-          value: "movie_db_dev"
+          value: "movie_db_{{ .Values.namespace }}"
         envFrom:
           - secretRef:
               name: postgres-movie-credentials

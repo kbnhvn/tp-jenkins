@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: fastapi-cast
 spec:
-  replicas: 1
+  replicas: "{{ .Values.casts.replicaCount }}"
   selector:
     matchLabels:
       app: fastapi-cast
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fastapi-cast
-        image: kbnhvn/fastapi-cast:v.0.0.1
+        image: "{{ .Values.casts.image.repository }}:{{ .Values.casts.image.tag | default .Chart.AppVersion }}"
         command: ["uvicorn"]
         args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
         env:
