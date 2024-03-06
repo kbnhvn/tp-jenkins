@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: postgres-movie
-  replicas: "{{ .Values.db_movies.replicaCount }}"
+  replicas: {{ .Values.db_movies.replicaCount }}
   template:
     metadata:
       labels:

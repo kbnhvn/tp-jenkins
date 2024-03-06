@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: fastapi-cast
 spec:
-  replicas: "{{ .Values.casts.replicaCount }}"
+  replicas: {{ .Values.casts.replicaCount }}
   selector:
     matchLabels:
       app: fastapi-cast
