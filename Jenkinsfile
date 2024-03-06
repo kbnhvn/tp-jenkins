@@ -164,7 +164,8 @@ stage('Deploiement en dev'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+casts.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+movies.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app helm --values=values.yml --namespace dev
                 '''
                 }
@@ -187,7 +188,8 @@ stage('Deploiement en QA'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+casts.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+movies.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app helm --values=values.yml --namespace qa
                 '''
                 }
@@ -210,7 +212,8 @@ stage('Deploiement en staging'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+casts.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+movies.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app helm --values=values.yml --namespace staging
                 '''
                 }
@@ -242,7 +245,8 @@ stage('Deploiement en staging'){
                 cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+namespace.*+namespace: ${NAMESPACE}+g" values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+casts.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                sed -i "s+movies.image.tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app helm --values=values.yml --namespace prod
                 '''
                 }
