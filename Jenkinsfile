@@ -13,7 +13,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker rm -f jenkins $DOCKER_IMAGE_CAST
+                        docker rm -f $DOCKER_IMAGE_CAST
                         docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG ./BaseProject/cast-service
                         sleep 6
                         '''
@@ -24,7 +24,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker rm -f jenkins $DOCKER_IMAGE_MOVIE
+                        docker rm -f $DOCKER_IMAGE_MOVIE
                         docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG ./BaseProject/movie-service
                         sleep 6
                         '''
@@ -40,7 +40,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 8000:8002 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
+                        docker run -d -p 8002:8000 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
                         sleep 10
                         '''
                     }
@@ -50,7 +50,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 8000:8001 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
+                        docker run -d -p 8001:8000 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
                         sleep 10
                         '''
                     }
