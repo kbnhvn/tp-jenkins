@@ -14,7 +14,7 @@ stages {
                     script {
                         sh '''
                         docker rm -f jenkins $DOCKER_IMAGE_CAST
-                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_CAST
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG ./BaseProject/cast-service
                         sleep 6
                         '''
                     }
@@ -25,7 +25,7 @@ stages {
                     script {
                         sh '''
                         docker rm -f jenkins $DOCKER_IMAGE_MOVIE
-                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG ./BaseProject/$DOCKER_IMAGE_MOVIE
+                        docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG ./BaseProject/movie-service
                         sleep 6
                         '''
                     }
