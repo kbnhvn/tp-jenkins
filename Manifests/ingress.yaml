@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: standard
+spec:
+  ingressClassName: traefik
+  # tls:
+  #   - secretName: fastapi-selfsigned-secret
+  #     hosts:
+  #       - jenkins.cours-datascientest-devops.cloudns.be
+  rules:
+  - host: jenkins.cours-datascientest-devops.cloudns.be
+    http:
+      paths:
+        # Path movies
+        - path: /api/v1/movies
+          pathType: Prefix
+          backend:
+             service:
+              name: fastapi-movie-service
+              port:
+                number: 8000
+        # Path casts
+        - path: /api/v1/casts
+          pathType: Prefix
+          backend:
+             service:
+              name: fastapi-cast-service
+              port:
+                number: 8000

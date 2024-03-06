@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-movie
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi-movie
+  template:
+    metadata:
+      labels:
+        app: fastapi-movie
+    spec:
+      containers:
+      - name: fastapi-movie
+        image: kbnhvn/fastapi-movie:v.0.0.1
+        env:
+        - name: DATABASE_URI
+          value: "postgresql://$(USERNAME):$(PASSWORD)@$(HOST):$(PORT)/$(NAME)"
+        - name: CAST_SERVICE_HOST_URL
+          value: "http://fastapi-cast-service.svc.cluster.local:8000/api/v1/casts/"
+        envFrom:
+          - secretRef:
+              name: fastapi-movie-credentials
+          - configMapRef:
+              name: fastapi-movie-config
+        ports:
+        - containerPort: 8000

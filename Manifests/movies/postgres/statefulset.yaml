@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-movie
+spec:
+  serviceName: 'postgres-movie'
+  selector:
+    matchLabels:
+      app: postgres-movie
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres-movie
+    spec:
+      containers:
+      - name: postgres-movie
+        image: postgres:12.0-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "movie_db_dev"
+        envFrom:
+          - secretRef:
+              name: postgres-movie-credentials
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-movie-volume
+        ports:
+        - containerPort: 5432
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-movie-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

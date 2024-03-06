@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-cast
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi-cast
+  template:
+    metadata:
+      labels:
+        app: fastapi-cast
+    spec:
+      containers:
+      - name: fastapi-cast
+        image: kbnhvn/fastapi-cast:v.0.0.1
+        env:
+        - name: DATABASE_URI
+          value: "postgresql://$(USERNAME):$(PASSWORD)@$(HOST):$(PORT)/$(NAME)"
+        envFrom:
+          - secretRef:
+              name: fastapi-cast-credentials
+          - configMapRef:
+              name: fastapi-cast-config
+        ports:
+        - containerPort: 8000
