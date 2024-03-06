@@ -3,8 +3,6 @@ environment { // Declaration of environment variables
 DOCKER_ID = "kbnhvn" // replace this with your docker-id
 DOCKER_IMAGE_CAST = "cast"
 DOCKER_IMAGE_MOVIE = "movie"
-PORT_CAST = ''
-PORT_MOVIE = ''
 DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
 }
 agent any // Jenkins will be able to select all available agents
@@ -42,7 +40,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 80:80 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
+                        docker run -d -p 8000:8002 --name $DOCKER_IMAGE_CAST $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
                         sleep 10
                         '''
                     }
@@ -52,7 +50,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        docker run -d -p 80:80 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
+                        docker run -d -p 8000:8001 --name $DOCKER_IMAGE_MOVIE $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
                         sleep 10
                         '''
                     }
@@ -67,7 +65,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        curl localhost:$PORT_CAST
+                        curl localhost:8002
                         '''
                     }
                 }
@@ -76,7 +74,7 @@ stages {
                 steps {
                     script {
                         sh '''
-                        curl localhost:$PORT_MOVIE
+                        curl localhost:8001
                         '''
                     }
                 }
@@ -132,6 +130,27 @@ stage('Deploiement en dev'){
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                 helm upgrade --install app fastapi --values=values.yml --namespace dev
+                '''
+                }
+            }
+
+        }
+stage('Deploiement en QA'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        }
+            steps {
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                cp fastapi/values.yaml values.yml
+                cat values.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                helm upgrade --install app fastapi --values=values.yml --namespace qa
                 '''
                 }
             }

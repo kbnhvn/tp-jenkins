@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-cast-config
+  namespace: standard
+data:
+  HOST: "postgres-cast-service.svc.cluster.local"
+  PORT: "5432"
+  NAME: "cast_db_dev"
